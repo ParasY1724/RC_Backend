@@ -1,26 +1,27 @@
+#models.py
 from django.db import models
-from datetime import datetime, timedelta
+from django.contrib.auth.models import User
 
-# Create your models here.
-class UserTable(models.Model) :
-    user_id =models.IntegerField(primary_key = True)
-    username = models.CharField(max_length = 255)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length = 255)
+
+class Team(models.Model):
+    user1 = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user1')
+    user2 = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user2')
+    teamname = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.teamname
 
 class Question(models.Model):
     question_id = models.IntegerField(primary_key=True)
-    question_text = models.TextField()
+    question_text = models.CharField()
     correct_answer = models.IntegerField()
 
 
-class TeamTable(models.Model) :
-    team_id = models.IntegerField(primary_key = True)
-    team_name = models.CharField(max_length = 255 , unique = True)
+class Progress(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE, related_name='progress')  
     score = models.IntegerField()
-    start_time = models.DateTimeField(default=datetime.now())
-    end_time = models.DateTimeField(default=datetime.now() + timedelta(hours=2)) 
-    current_question_id = models.ForeignKey(Question, on_delete=models.PROTECT)
-    attempts = models.IntegerField(default=2)
-
-
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField() 
+    current_question = models.ForeignKey(Question, on_delete=models.PROTECT)
+    isAttemptedFirst = models.BooleanField(default=False)
+    isAttemptedSecond = models.BooleanField(default=False)
