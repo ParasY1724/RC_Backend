@@ -1,4 +1,3 @@
-#serializers.py
 from rest_framework import serializers
 from .models import Question,Progress,Team
 from django.contrib.auth.models import User
@@ -7,14 +6,15 @@ from django.contrib.auth.models import User
 
 
 class QuestionSerializer(serializers.ModelSerializer):
+    correct_answer = serializers.IntegerField(write_only = True)
     class Meta:
         model = Question
-        fields = ['question_id','question_text','correct_answer']
+        fields = ['question_id', 'question_text', 'correct_answer', 'category', 'level']
 
 class ProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Progress
-        fields = [ "team" , "score" , "start_time" , "end_time" , "current_question_id" ,"isAttemptedFirst" ,"isAttemptedSecond" ]
+        fields = [ "team" , "score" , "start_time" , "end_time" , "current_questions" ,"isAttemptedFirst" ,"isAttemptedSecond" ]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,4 +32,4 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta: 
         model = Team
-        fields = ['teamname', 'user1', 'user2']
+        fields = ['teamname', 'user1', 'user2','category']

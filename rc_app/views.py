@@ -1,9 +1,11 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes
-from .models import Team
-from .serializers import TeamSerializer, UserSerializer
+from .models import Team,Progress
+from .serializers import TeamSerializer, UserSerializer,QuestionSerializer
 from rest_framework.permissions import IsAuthenticated
+
+
 
 @api_view(['POST'])
 def create_team(request):
@@ -35,3 +37,24 @@ def leaderboard(request):
     teams = Team.objects.all().order_by('-progress__score')
     serializer = TeamSerializer(teams, many=True)
     return Response(serializer.data)
+
+from django.db.models import Q  # For Logical Operations
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_question(request):
+    try:
+        team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
+
+    progress, created = Progress.objects.get_or_create(team=team)          #get_or_create tuple return karta he
+
+    if created:
+        questions = team.get_questions_for_team()
+        progress.current_questions = str(questions)
+        progress.save()
+    else:
+        questions = progress.get_saved_questions()
+
+    question_serializer = QuestionSerializer(questions, many=True)
+    return Response(question_serializer.data, status=status.HTTP_200_OK)
