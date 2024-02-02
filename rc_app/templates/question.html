@@ -13,7 +13,14 @@
         <p>{{ question }}</p>
       
         <input type="text" name = "team" value="{{team}}" hidden>
-        <input type="text" name="answer" required>
+        {% if attempts == 2 %}
+        <input type="number" name="answer" required>
+        <input type="number" name="answer" required  disabled>
+        {%else %}
+        <input type="number" name="answer"  value="{{ prev_ans }}" disabled>
+        <input type="number" name="answer" required >
+        {% endif %}
+        
         <input type="submit" value="Submit">
        <p>Attempts Available :{{attempts}} </p> 
     </form>

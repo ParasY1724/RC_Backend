@@ -25,6 +25,7 @@ class Progress(models.Model):
     end_time = models.DateTimeField(auto_now_add=True, blank=True) 
     current_question = models.IntegerField(default=1)
     question_list = models.CharField(max_length = 256)
+    prev_answer = models.IntegerField(default = 0)
     isAttemptedFirst = models.BooleanField(default=False)
 
     

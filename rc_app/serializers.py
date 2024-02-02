@@ -15,10 +15,11 @@ class ProgressSerializer(serializers.ModelSerializer):
     end_time = serializers.DateTimeField(write_only = True)
     current_question = serializers.IntegerField(write_only = True)
     question_list = serializers.CharField(write_only = True)
+    prev_answer = serializers.IntegerField(write_only = True)
     isAttemptedFirst = serializers.BooleanField(write_only = True)
     class Meta:
         model = Progress
-        fields = ["team_name", "score", "start_time", "end_time", "current_question", "question_list", "isAttemptedFirst"]
+        fields = ["team_name", "score", "start_time", "end_time", "current_question", "question_list", "prev_answer" ,"isAttemptedFirst"]
     
 
 class UserSerializer(serializers.ModelSerializer):

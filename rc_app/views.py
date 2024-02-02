@@ -80,7 +80,8 @@ class GetQuestionView(generics.ListCreateAPIView):
             "Current_Question" : progress.current_question,
             "question" : question.question_text,
             "team" : progress.team,
-            "attempts" : 2 - progress.isAttemptedFirst
+            "attempts" : 2 - progress.isAttemptedFirst,
+            "prev_ans" : progress.prev_answer
         }
         return render(request, 'question.html', context)
 
@@ -100,11 +101,12 @@ class GetQuestionView(generics.ListCreateAPIView):
         que_id = questions_data[progress.current_question-1]
         question = Question.objects.get(question_id = que_id)
 
-        if (int(answer) == question.correct_answer):
+        if (answer == question.correct_answer):
             progress.score +=1
             progress.current_question+=1
             progress.isAttemptedFirst = False
         else :
+            progress.prev_answer = answer
             if ( not progress.isAttemptedFirst):
                 progress.isAttemptedFirst = True
             else:
