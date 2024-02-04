@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     user1 = UserSerializer()
     user2 = UserSerializer()
-
+    login_status = serializers.BooleanField(write_only=True)
     class Meta: 
         model = Team
         fields = ['teamname', 'user1', 'user2', 'category','login_status']

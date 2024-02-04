@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time</title>
+</head>
+<body>
+<div id="countdown" style="font-weight:700;">
+        {{ data.hours }} <span>:</span>
+        {{ data.minutes }} <span>:</span>
+        {{ data.seconds }}</div>
+</div>
+<script>
+    function updateTimer() {
+        var hours = parseInt(document.getElementById('countdown').textContent.split(':')[0]);
+        var minutes = parseInt(document.getElementById('countdown').textContent.split(':')[1]);
+        var seconds = parseInt(document.getElementById('countdown').textContent.split(':')[2]);
+
+        if (seconds > 0) {
+            seconds--;
+        } else {
+            if (minutes > 0) {
+                minutes--;
+                seconds = 59;
+            } else {
+                if (hours > 0) {
+                    hours--;
+                    minutes = 59;
+                    seconds = 59;
+                } else {
+                    // Timer has reached zero
+                }
+            }
+        }
+
+        document.getElementById('countdown').textContent =
+            (hours < 10 ? '0' : '') + hours + ' : ' +
+            (minutes < 10 ? '0' : '') + minutes + ' : ' +
+            (seconds < 10 ? '0' : '') + seconds;
+    }
+    setInterval(updateTimer, 1000);
+</script>   
+</body>
+</html>

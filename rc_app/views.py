@@ -8,6 +8,7 @@ import jwt,datetime,random
 from rest_framework.exceptions import AuthenticationFailed
 from .permissions import JWTAuthentication
 from django.shortcuts import  redirect,render
+from django.utils import timezone
 
 
 
@@ -25,10 +26,10 @@ class LoginView(generics.CreateAPIView):
         team = None
         user = self.get_queryset().filter(username=username).first()
         try :
-            team = Team.objects.get(teamname= team_name )
+            team = Team.objects.get(teamname = team_name)
          
             if team.login_status :
-                raise AuthenticationFailed('Another User is Logged-In !!')
+                    raise AuthenticationFailed('Another User is Logged-In !!')
             else :
                 team.login_status = True
                 team.save()
@@ -50,6 +51,13 @@ class LoginView(generics.CreateAPIView):
         response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {'jwt': token}
         return response
+    
+    def get(self,request):
+        if(JWTAuthentication.has_permission(self,request)):
+           return redirect('get_question')
+        
+    
+
 
 
 class GetQuestionView(generics.ListCreateAPIView):
@@ -68,6 +76,8 @@ class GetQuestionView(generics.ListCreateAPIView):
         if  created or not progress.question_list :
             q_list = str(random.sample(range(1,6),5) + random.sample(range(6,11),5)).strip("[]")
             progress.question_list = q_list
+            progress.start_time = timezone.now()
+            progress.end_time = timezone.now() + timezone.timedelta(hours=2)
             progress.save()
         if (progress.current_question == 10) :
             return Response({"message": "Questions are over"}, status=status.HTTP_404_NOT_FOUND)
@@ -88,6 +98,7 @@ class GetQuestionView(generics.ListCreateAPIView):
     
     def post(self,request):
         answer = request.data.get("answer")
+        answer = int(answer)
         team  = request.data.get("team")
         try:
             team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
@@ -149,3 +160,55 @@ class LogoutView(views.APIView):
             'message' : 'Logged Out!',
         }
         return response
+    
+
+class ResultView(generics.ListAPIView):
+    def get(self,request):
+        token = request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed("Authentication credentials were not provided.")
+        team = None
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=["HS256"])
+            team_name = payload['team']
+            team = Team.objects.get(teamname= team_name)
+            progress = Progress.objects.get(team = team)
+            return Response({"Score" : progress.score  })
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Token has expired")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token")
+        except Team.DoesNotExist:
+            raise AuthenticationFailed("User does not exist")
+        except Progress.DoesNotExist:
+            raise AuthenticationFailed("Progress does not exist")
+           
+class TimerView(generics.ListAPIView):
+        permission_classes = [JWTAuthentication]
+        def get(self,request):
+            try:
+                team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
+                progress = Progress.objects.get(team=team)
+            except Team.DoesNotExist:
+                return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
+            except Progress.DoesNotExist :
+                return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
+
+            if progress:
+                time_remaining = progress.end_time - timezone.now()
+
+                hours = time_remaining.seconds // 3600
+                minutes = (time_remaining.seconds % 3600) // 60
+                seconds = time_remaining.seconds % 60
+                data = {
+                    'hours': hours,
+                    'minutes': minutes,
+                    'seconds': seconds
+                }
+            else:
+                data = {
+                    'hours': 0,
+                    'minutes': 0,
+                    'seconds': 0
+                }
+            return render(request, 'Time.html', {'data': data})

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Question(models.Model):
     CATEGORY_CHOICES = [("JR", 'Junior'),("SR", 'Senior'),]  
@@ -21,8 +22,8 @@ class Team(models.Model):
 class Progress(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE, related_name='progress')  
     score = models.IntegerField(default = 0)
-    start_time = models.DateTimeField(auto_now_add=True, blank=True)
-    end_time = models.DateTimeField(auto_now_add=True, blank=True) 
+    start_time = models.DateTimeField(default  = timezone.now())
+    end_time = models.DateTimeField(default  = timezone.now()) 
     current_question = models.IntegerField(default=1)
     question_list = models.CharField(max_length = 256)
     prev_answer = models.IntegerField(default = 0)
