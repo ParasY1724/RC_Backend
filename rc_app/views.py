@@ -15,6 +15,7 @@ from django.utils import timezone
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = TeamSerializer
 
+
 class LoginView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -24,7 +25,7 @@ class LoginView(generics.CreateAPIView):
         password = request.data.get('password')
         team_name = request.data.get('team')
         team = None
-        user = self.get_queryset().filter(username=username).first()
+        user = self.get_queryset().filter(username=username).first()        
         try :
             team = Team.objects.get(teamname = team_name)
          
@@ -74,7 +75,11 @@ class GetQuestionView(generics.ListCreateAPIView):
         progress, created = Progress.objects.get_or_create(team=team)
 
         if  created or not progress.question_list :
-            q_list = str(random.sample(range(1,6),5) + random.sample(range(6,11),5)).strip("[]")
+            if (team.category == 'JR'):
+                q_list = str(random.sample(range(1,6),5) + random.sample(range(6,11),5)).strip("[]")
+            else :
+                q_list = str(random.sample(range(11,16),5) + random.sample(range(16,21),5)).strip("[]")
+
             progress.question_list = q_list
             progress.start_time = timezone.now()
             progress.end_time = timezone.now() + timezone.timedelta(hours=2)
@@ -85,14 +90,35 @@ class GetQuestionView(generics.ListCreateAPIView):
         questions_data = (progress.question_list).split(',')
         que_id = questions_data[progress.current_question-1]
         question = Question.objects.get(question_id = que_id)
+
+        time_remaining = progress.end_time - timezone.now()
+        if time_remaining.total_seconds() > 0:
+
+            hours = time_remaining.seconds // 3600
+            minutes = (time_remaining.seconds % 3600) // 60
+            seconds = time_remaining.seconds % 60
+            time_data = {
+                'hours': hours,
+                'minutes': minutes,
+                'seconds': seconds
+            }
+        else:
+            time_data = {
+                'hours': 0,
+                'minutes': 0,
+                'seconds': 0
+            }
         
         context = {
             "Current_Question" : progress.current_question,
             "question" : question.question_text,
             "team" : progress.team,
             "attempts" : 2 - progress.isAttemptedFirst,
-            "prev_ans" : progress.prev_answer
+            "prev_ans" : progress.prev_answer,
         }
+
+        context.update(time_data)
+
         return render(request, 'question.html', context)
 
     
@@ -183,32 +209,3 @@ class ResultView(generics.ListAPIView):
         except Progress.DoesNotExist:
             raise AuthenticationFailed("Progress does not exist")
            
-class TimerView(generics.ListAPIView):
-        permission_classes = [JWTAuthentication]
-        def get(self,request):
-            try:
-                team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
-                progress = Progress.objects.get(team=team)
-            except Team.DoesNotExist:
-                return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
-            except Progress.DoesNotExist :
-                return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
-
-            if progress:
-                time_remaining = progress.end_time - timezone.now()
-
-                hours = time_remaining.seconds // 3600
-                minutes = (time_remaining.seconds % 3600) // 60
-                seconds = time_remaining.seconds % 60
-                data = {
-                    'hours': hours,
-                    'minutes': minutes,
-                    'seconds': seconds
-                }
-            else:
-                data = {
-                    'hours': 0,
-                    'minutes': 0,
-                    'seconds': 0
-                }
-            return render(request, 'Time.html', {'data': data})
