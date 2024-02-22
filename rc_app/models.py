@@ -13,7 +13,7 @@ class Team(models.Model):
     user1 = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user1')
     user2 = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user2')
     category = models.CharField(max_length=2, choices=Question.CATEGORY_CHOICES)
-    teamname = models.CharField(max_length=255,unique = True    )
+    teamname = models.CharField(max_length=255,unique = True)
     login_status = models.BooleanField(default=False)
 
     def __str__(self):
@@ -28,5 +28,9 @@ class Progress(models.Model):
     question_list = models.CharField(max_length = 256)
     prev_answer = models.IntegerField(default = 0)
     isAttemptedFirst = models.BooleanField(default=False)
+    lifeline1=models.BooleanField(default=False)
+    lifeline2=models.BooleanField(default=False)
+    lifeline3=models.BooleanField(default=False)
+    lifeline_flag = models.IntegerField(default = 1)
 
-    
+

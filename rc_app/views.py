@@ -9,7 +9,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from .permissions import JWTAuthentication
 from django.shortcuts import  redirect,render
 from django.utils import timezone
-
+from . import MarkingScheme
 
 
 class CreateTeamView(generics.CreateAPIView):
@@ -66,7 +66,7 @@ class GetQuestionView(generics.ListCreateAPIView):
     permission_classes = [JWTAuthentication]
     serializer_class = QuestionSerializer
 
-    def get(self, request): 
+    def get(self, request):
         try:
             team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
         except Team.DoesNotExist:
@@ -139,18 +139,11 @@ class GetQuestionView(generics.ListCreateAPIView):
         question = Question.objects.get(question_id = que_id)
 
         if (answer == question.correct_answer):
-            progress.score +=1
-            progress.current_question+=1
-            progress.isAttemptedFirst = False
+            MarkingScheme.evaluate_postive(progress)
         else :
-            progress.prev_answer = answer
-            if ( not progress.isAttemptedFirst):
-                progress.isAttemptedFirst = True
-            else:
-                progress.isAttemptedFirst = False
-                progress.current_question+=1
+            MarkingScheme.evaluate_negative(progress,answer)
+        progress.lifeline_flag = 1
         progress.save()
-
         return redirect('get_question')
         
 
