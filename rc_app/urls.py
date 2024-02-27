@@ -9,5 +9,5 @@ urlpatterns = [
     path('get_question', GetQuestionView.as_view(), name='get_question'),
     path('logout',LogoutView.as_view(),name="logout"),
     path('result',ResultView.as_view(),name="result"),
-    path('aqua',GetLifeline1.as_view(),name="Aqua_Point"),
+    path('lifeline',GetLifeline1.as_view(),name="life_line"),
 ]

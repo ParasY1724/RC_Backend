@@ -32,5 +32,3 @@ class Progress(models.Model):
     lifeline2=models.BooleanField(default=False)
     lifeline3=models.BooleanField(default=False)
     lifeline_flag = models.IntegerField(default = 1)
-
-

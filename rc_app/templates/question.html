@@ -30,8 +30,10 @@
        <p>Attempts Available :{{attempts}} </p> 
     </form>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
-        function updateTimer() {
+        var lifeline_flag = "{{lifeline_flag}}".trim()
+        function updateTimer() {    
             var hours = parseInt(document.getElementById('countdown').textContent.split(':')[0]);
             var minutes = parseInt(document.getElementById('countdown').textContent.split(':')[1]);
             var seconds = parseInt(document.getElementById('countdown').textContent.split(':')[2]);
@@ -58,7 +60,34 @@
                 (minutes < 10 ? '0' : '') + minutes + ' : ' +
                 (seconds < 10 ? '0' : '') + seconds;
         }
-        setInterval(updateTimer, 1000);
+            
+        
+        function run(){
+                if( lifeline_flag == "3") {
+                    function fetchdata(){
+                    $.ajax({ 
+                        url: "lifeline?lifeline=time_freeze", 
+                        type: 'get', 
+                        success: function(response){
+                            if (response.seconds == -1){
+                                location.reload();
+                            }
+                            $('#countdown').html(
+                                (response.hours < 10 ? '0' : '') + response.hours + ' : ' +
+                                (response.minutes < 10 ? '0' : '') + response.minutes + ' : ' +
+                                (response.seconds < 10 ? '0' : '') + response.seconds
+                            );
+
+                        } 
+                    }); 
+                } 
+            setInterval(fetchdata,1000); 
+            }else{
+            setInterval(updateTimer, 1000);
+            }
+        }
+        run();
+
     </script>   
 </body>
 </html>

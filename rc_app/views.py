@@ -57,9 +57,6 @@ class LoginView(generics.CreateAPIView):
         if(JWTAuthentication.has_permission(self,request)):
            return redirect('get_question')
         
-    
-
-
 
 class GetQuestionView(generics.ListCreateAPIView):
     queryset = Question.objects.none()
@@ -91,23 +88,13 @@ class GetQuestionView(generics.ListCreateAPIView):
         que_id = questions_data[progress.current_question-1]
         question = Question.objects.get(question_id = que_id)
 
-        time_remaining = progress.end_time - timezone.now()
-        if time_remaining.total_seconds() > 0:
-
-            hours = time_remaining.seconds // 3600
-            minutes = (time_remaining.seconds % 3600) // 60
-            seconds = time_remaining.seconds % 60
-            time_data = {
-                'hours': hours,
-                'minutes': minutes,
-                'seconds': seconds
-            }
-        else:
-            time_data = {
-                'hours': 0,
-                'minutes': 0,
-                'seconds': 0
-            }
+        if (progress.lifeline_flag == 3):
+            time_delta = ((timezone.now() - progress.start_time).total_seconds())//10
+            time_remaining = progress.end_time - progress.start_time - timezone.timedelta(seconds=time_delta)
+        else :
+            time_remaining = (progress.end_time - timezone.now())
+        
+        time_data = MarkingScheme.Timer(time_remaining)
         
         context = {
             "Current_Question" : progress.current_question,
@@ -115,6 +102,7 @@ class GetQuestionView(generics.ListCreateAPIView):
             "team" : progress.team,
             "attempts" : 2 - progress.isAttemptedFirst,
             "prev_ans" : progress.prev_answer,
+            "lifeline_flag" : progress.lifeline_flag,
         }
 
         context.update(time_data)
