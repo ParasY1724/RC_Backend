@@ -1,4 +1,4 @@
-from . import MarkingScheme
+from . import MarkingScheme,Timer
 from rest_framework import generics,status
 from .permissions import JWTAuthentication
 from .serializers import QuestionSerializer
@@ -8,6 +8,16 @@ from django.db.models import Q
 from django.utils import timezone
 from django.shortcuts import redirect   
 from django.http import JsonResponse
+
+''' 
+Life_line Flag -->
+ 1 -> no lifeline is currently activated
+ 2 -> lifeline 1 is currently activated
+ 3 -> lifeline 2 is currently activated
+'''
+
+
+
 
 #lifeline 1
 def Amplifier(progress):
@@ -19,8 +29,9 @@ def Amplifier(progress):
     else :
         return Response({"error": "Lifeline is already used or can't use right now"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+#lifeline 2
 def Freezer(progress):
-    if not progress.lifeline2:
+    if ( not progress.lifeline2 and progress.lifeline1):
         progress.lifeline2 = True
         progress.lifeline_flag = 3
         progress.start_time = timezone.now()
@@ -41,15 +52,16 @@ def Freezer(progress):
             )
      
         time_remaining = progress.end_time - progress.start_time - timezone.timedelta(seconds=time_delta)
-        time_data = MarkingScheme.Timer(time_remaining)
+        time_data = Timer.Timer(time_remaining)
 
         return JsonResponse(time_data)
+    else :
+        return Response({"error": "Lifeline is already used or can't use right now"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
 
 
 class GetLifeline1(generics.ListAPIView):
-    queryset = Question.objects.none()
     permission_classes = [JWTAuthentication]
-    serializer_class = QuestionSerializer
 
     def get(self, request):
         lifeline_no = request.query_params.get('lifeline',default = "NONE")

@@ -9,7 +9,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from .permissions import JWTAuthentication
 from django.shortcuts import  redirect,render
 from django.utils import timezone
-from . import MarkingScheme
+from . import MarkingScheme,Timer
 
 
 class CreateTeamView(generics.CreateAPIView):
@@ -94,7 +94,7 @@ class GetQuestionView(generics.ListCreateAPIView):
         else :
             time_remaining = (progress.end_time - timezone.now())
         
-        time_data = MarkingScheme.Timer(time_remaining)
+        time_data = Timer.Timer(time_remaining)
         
         context = {
             "Current_Question" : progress.current_question,
@@ -130,7 +130,7 @@ class GetQuestionView(generics.ListCreateAPIView):
             MarkingScheme.evaluate_postive(progress)
         else :
             MarkingScheme.evaluate_negative(progress,answer)
-        progress.lifeline_flag = 1
+        progress.lifeline_flag = (1 if progress.lifeline_flag == 2 else progress.lifeline_flag)
         progress.save()
         return redirect('get_question')
         
