@@ -3,6 +3,7 @@ from django.utils import timezone
 POSTIVE_MARKING = 4
 NEGATIVE_MARKING = -2
 
+#marking scheme
 def evaluate_postive(progress):
     if (progress.isAttemptedFirst):
         score = POSTIVE_MARKING/2 
@@ -12,7 +13,7 @@ def evaluate_postive(progress):
     progress.isAttemptedFirst = False
 
     if (progress.lifeline_flag == 2) :
-         progress.score += score * 2
+         progress.score += score * 4
     else :
          progress.score += score 
 
@@ -31,7 +32,7 @@ def evaluate_negative(progress,answer) :
     else:
         progress.score += score * 1 
          
-    
+
         
         
     

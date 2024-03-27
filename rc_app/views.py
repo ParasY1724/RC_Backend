@@ -1,3 +1,4 @@
+#Reset lifeline after submit
 from rest_framework import generics, status,views
 from rest_framework.response import Response
 from django.db.models import Q
@@ -9,7 +10,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from .permissions import JWTAuthentication
 from django.shortcuts import  redirect,render
 from django.utils import timezone
-from . import MarkingScheme,Timer
+from . import MarkingScheme,Timer,lifelines
 
 
 class CreateTeamView(generics.CreateAPIView):
@@ -130,7 +131,8 @@ class GetQuestionView(generics.ListCreateAPIView):
             MarkingScheme.evaluate_postive(progress)
         else :
             MarkingScheme.evaluate_negative(progress,answer)
-        progress.lifeline_flag = (1 if progress.lifeline_flag == 2 else progress.lifeline_flag)
+        lifelines.save_response(question,answer)
+        lifelines.reset_lifelines(progress) 
         progress.save()
         return redirect('get_question')
         
