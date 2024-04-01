@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
-from django.contrib.auth.models import User
+from .models import Team
 
 class JWTAuthentication(BasePermission):
     def has_permission(self, request,*args, **kwargss):
@@ -11,16 +11,15 @@ class JWTAuthentication(BasePermission):
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=["HS256"])
-            username = payload['username']
-            user = User.objects.get(username=username)
-            request.user = user
+            teamname = payload['teamname']
+            team = Team.objects.get(teamname=teamname)
+            request.team = team
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError:
             raise AuthenticationFailed("Invalid token")
-        except User.DoesNotExist:
-            raise AuthenticationFailed("User does not exist")
-
+        except Team.DoesNotExist:
+            raise AuthenticationFailed("Team does not exist")
         return True
     
     

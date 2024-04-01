@@ -18,8 +18,6 @@ Life_line Flag -->
 '''
 
 
-#conditions remaining
-
 #lifeline 1
 def Amplifier(progress):
     if not (progress.lifeline1 or progress.isAttemptedFirst):
@@ -70,11 +68,9 @@ class GetLifeline1(generics.ListAPIView):
 
     def get(self, request):
         lifeline_no = request.query_params.get('lifeline',default = "NONE")
+        team = request.team
         try:
-            team = Team.objects.get(Q(user1=request.user) | Q(user2=request.user))
             progress = Progress.objects.get(team = team)
-        except Team.DoesNotExist:
-            return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
         except Progress.DoesNotExist:
             return Response({"error": "Team not found for the authenticated user"}, status=status.HTTP_404_NOT_FOUND)
         if (lifeline_no == "aqua_point"):

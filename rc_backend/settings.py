@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
      ),
-    #   'DEFAULT_RENDERER_CLASSES':('rest_framework.renderers.JSONRenderer',)
+       'DEFAULT_RENDERER_CLASSES':('rest_framework.renderers.JSONRenderer',)
 }
 
 
