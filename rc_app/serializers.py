@@ -7,7 +7,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     correct_answer = serializers.IntegerField(write_only = True)
     class Meta:
         model = Question
-        fields = "__all__"
+        fields = ['question_id', 'question_text', 'correct_answer'] 
 
 class ProgressSerializer(serializers.ModelSerializer):
     team_name = serializers.CharField(source='team.teamname', read_only=True)
@@ -19,7 +19,7 @@ class ProgressSerializer(serializers.ModelSerializer):
     isAttemptedFirst = serializers.BooleanField(write_only = True)
     class Meta:
         model = Progress
-        fields = "__all__"
+        fields = ["team_name", "score", "start_time", "end_time", "current_question", "question_list", "prev_answer" ,"isAttemptedFirst"]
     
 class CreateTeamSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
