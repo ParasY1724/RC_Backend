@@ -106,6 +106,6 @@ def save_response(question,answer):
 
 def reset_lifelines(progress):
     if(progress.lifeline_flag == 3 ):
-        Freezer(progress,True) 
-    else:
+        Freezer(progress,True)
+    else :
         progress.lifeline_flag = 1

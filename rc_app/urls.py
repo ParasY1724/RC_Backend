@@ -1,4 +1,3 @@
-#urls.py
 from django.urls import path
 from .views import CreateTeamView,LeaderboardView,GetQuestionView,LoginView,LogoutView,ResultView
 from .lifelines import GetLifeline1

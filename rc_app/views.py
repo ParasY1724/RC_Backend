@@ -1,4 +1,3 @@
-#Reset lifeline after submit
 from rest_framework import generics, status,views
 from rest_framework.response import Response
 from django.db.models import Q
