@@ -132,6 +132,12 @@ class LeaderboardView(generics.ListAPIView):
     serializer_class = ProgressSerializer
     permission_classes = [JWTAuthentication]
 
+    def get(self,request):
+        team_set = self.queryset.filter(team__category=request.team.category)
+        serialized_data = self.serializer_class(team_set, many=True).data
+
+        return Response(serialized_data)
+
 
 class LogoutView(views.APIView):
     permission_classes = [JWTAuthentication]
