@@ -11,12 +11,8 @@ from . import MarkingScheme,Timer,lifelines
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
 
-
-
-
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = CreateTeamSerializer
-
 
 class LoginView(generics.CreateAPIView):
     queryset = Team.objects.all()
@@ -34,7 +30,7 @@ class LoginView(generics.CreateAPIView):
             raise AuthenticationFailed('Invalid teamname or password')
         
         if team.login_status:
-            raise AuthenticationFailed('Another user is logged in with this team')
+            raise AuthenticationFailed('User is already logged in')
 
         team.login_status = True
         team.save()
@@ -46,10 +42,7 @@ class LoginView(generics.CreateAPIView):
         }
 
         token = jwt.encode(payload, 'secret', algorithm='HS256')
-        response = Response()
-        response.set_cookie(key='jwt', value=token, httponly=True)
-        response.data = {'jwt': token}
-        return response
+        return Response({'jwt': token}, status=status.HTTP_201_CREATED)
     
     def get(self,request):
         if(JWTAuthentication.has_permission(self,request)):
@@ -138,7 +131,6 @@ class LeaderboardView(generics.ListAPIView):
 
         return Response(serialized_data)
 
-
 class LogoutView(views.APIView):
     permission_classes = [JWTAuthentication]
     def get(self,request):
@@ -146,13 +138,11 @@ class LogoutView(views.APIView):
         team.login_status = False
         team.save()
         response = Response()
-        response.delete_cookie('jwt')
         response.data = {
             'message' : 'Logged Out!',
         }
         return response
     
-
 class ResultView(generics.ListAPIView):
     permission_classes = [JWTAuthentication]
     def get(self,request):
@@ -162,5 +152,3 @@ class ResultView(generics.ListAPIView):
             return Response({"Score" : progress.score  })
         except Progress.DoesNotExist:
             raise AuthenticationFailed("Progress does not exist")
-           
- 

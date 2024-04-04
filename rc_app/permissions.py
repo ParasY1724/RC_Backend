@@ -4,11 +4,10 @@ import jwt
 from .models import Team
 
 class JWTAuthentication(BasePermission):
-    def has_permission(self, request,*args, **kwargss):
-        token = request.COOKIES.get('jwt')
+    def has_permission(self, request, *args, **kwargs):
+        token = request.headers.get('Authorization')
         if not token:
             raise AuthenticationFailed("Authentication credentials were not provided.")
-
         try:
             payload = jwt.decode(token, 'secret', algorithms=["HS256"])
             teamname = payload['teamname']
@@ -22,5 +21,4 @@ class JWTAuthentication(BasePermission):
             raise AuthenticationFailed("Team does not exist")
         return True
     
-    
-
+    #Question.objects.create( question_id=i,question_text='1+1=?',correct_answer=2,responses={"1" : 10 , "5": 12 ,"3" : 3})

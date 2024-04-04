@@ -13,7 +13,6 @@ class ProgressSerializer(serializers.ModelSerializer):
     team_name = serializers.CharField(source='team.teamname', read_only=True)
     start_time = serializers.DateTimeField(write_only = True)
     end_time = serializers.DateTimeField(write_only = True)
-    current_question = serializers.IntegerField(write_only = True)
     question_list = serializers.CharField(write_only = True)
     prev_answer = serializers.IntegerField(write_only = True)
     isAttemptedFirst = serializers.BooleanField(write_only = True)
