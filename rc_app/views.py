@@ -70,7 +70,7 @@ class GetQuestionView(generics.ListCreateAPIView):
             progress.save()
 
         if progress.current_question == 10:
-            return Response({"message": "Questions are over"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Questions are over"}, status=status.HTTP_204_NO_CONTENT)
 
         questions_data = progress.question_list.split(',')
         que_id = questions_data[progress.current_question - 1]
@@ -78,7 +78,7 @@ class GetQuestionView(generics.ListCreateAPIView):
 
         time_remaining = (progress.end_time - timezone.now())
         time_data = Timer.Timer(time_remaining)
-
+        
         context = {
             "Current_Question" : progress.current_question,
             "question" : question.question_text,
@@ -99,7 +99,7 @@ class GetQuestionView(generics.ListCreateAPIView):
     
     def post(self,request):
         answer = request.data.get("answer")
-        answer = int(answer)
+        answer = int(answer)    
         team  = request.team
         try:
             progress = Progress.objects.get(team=team)

@@ -32,7 +32,7 @@ def Amplifier(progress):
 
 #lifeline 2
 def Freezer(progress,issubmit = False):
-    if ( not progress.lifeline2 and progress.lifeline1 and progress.lifeline_flag == 1):
+    if ( not progress.lifeline2  and progress.lifeline_flag == 1 and progress.current_question >= 5):
         progress.lifeline2 = True
         progress.lifeline_flag = 3
         progress.start_time = timezone.now()
@@ -53,7 +53,7 @@ def Freezer(progress,issubmit = False):
     
 
 def Poll(progress):
-    if progress.lifeline2 and not progress.isAttemptedFirst and progress.lifeline_flag == 1:
+    if  not progress.isAttemptedFirst and progress.lifeline_flag == 1:
         progress.lifeline_flag = 4
         progress.lifeline3 = True
         questions_data = progress.question_list.split(',')
