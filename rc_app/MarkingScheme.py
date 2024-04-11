@@ -9,6 +9,7 @@ def evaluate_postive(progress):
     else :
         score = POSTIVE_MARKING
     progress.current_question+=1
+    progress.correct_count +=1
     progress.isAttemptedFirst = False
 
     if (progress.lifeline_flag == 2) :
@@ -18,6 +19,7 @@ def evaluate_postive(progress):
 
 def evaluate_negative(progress,answer) :
     progress.prev_answer = answer
+    progress.incorrect_count += 1
     if (progress.isAttemptedFirst):
         score = NEGATIVE_MARKING/2
         progress.isAttemptedFirst = False

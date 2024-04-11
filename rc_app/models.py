@@ -25,6 +25,8 @@ class Progress(models.Model):
     current_question = models.IntegerField(default=1)
     question_list = models.CharField(max_length = 256)
     prev_answer = models.IntegerField(default = 0)
+    correct_count = models.SmallIntegerField(default=0)
+    incorrect_count = models.SmallIntegerField(default=0)
     isAttemptedFirst = models.BooleanField(default=False)
     lifeline1=models.BooleanField(default=False)
     lifeline2=models.BooleanField(default=False)

@@ -149,6 +149,14 @@ class ResultView(generics.ListAPIView):
         team = request.team
         try:
             progress = Progress.objects.get(team = team)
-            return Response({"Score" : progress.score  })
+            rank = list(Progress.objects.all().order_by('-score').filter(team__category=team.category)).index(progress)
+
+
+            return Response({"score" : progress.score ,
+                             "correct_submission" : progress.correct_count ,
+                             "incorrect_submission" : progress.incorrect_count,
+                             "question_attempted" : progress.current_question - 1,
+                             "rank" : rank+1,            
+                              })
         except Progress.DoesNotExist:
             raise AuthenticationFailed("Progress does not exist")

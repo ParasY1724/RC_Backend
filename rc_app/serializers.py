@@ -18,7 +18,7 @@ class ProgressSerializer(serializers.ModelSerializer):
     isAttemptedFirst = serializers.BooleanField(write_only = True)
     class Meta:
         model = Progress
-        fields = ["team_name", "score", "start_time", "end_time", "current_question", "question_list", "prev_answer" ,"isAttemptedFirst"]
+        fields = ["team_name", "score", "start_time", "end_time", "current_question", "question_list", "prev_answer" ,"isAttemptedFirst","incorrect_count","correct_count"]
     
 class CreateTeamSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
