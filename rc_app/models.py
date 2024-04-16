@@ -2,7 +2,7 @@ from django.db import models
 
 class Question(models.Model):
     question_id = models.IntegerField(primary_key=True)
-    question_text = models.CharField(max_length=255)
+    question_text = models.TextField()
     correct_answer = models.IntegerField()
     responses = models.CharField(max_length= 255 , null = True )
 
