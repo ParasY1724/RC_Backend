@@ -39,16 +39,15 @@ def Freezer(progress,issubmit = False):
         progress.save()
         return JsonResponse({ "success" : "Activated"})
     elif progress.lifeline_flag == 3:
-        time_delta = ((timezone.now() - progress.start_time).total_seconds())//10
+        time_delta = ((timezone.now() - progress.start_time).total_seconds())/10
         if (time_delta >= 6 or issubmit ):
             progress.lifeline_flag = 1
-            progress.end_time += timezone.timedelta(seconds=(time_delta * 9))
+            progress.end_time += timezone.timedelta(seconds=int(time_delta * 9))
 
             progress.save()
             return JsonResponse({'hours': -1,'minutes': -1,'seconds': -1})
         time_remaining = progress.end_time - progress.start_time - timezone.timedelta(seconds=time_delta)
         time_data = Timer.Timer(time_remaining)
-
         return JsonResponse(time_data)
     
 
@@ -87,7 +86,6 @@ class GetLifeline1(generics.ListAPIView):
                 return Response(context)
         return JsonResponse({"error": "Lifeline is already used or can't use right now"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        
 
 def save_response(question,answer):
     response_answer = str(answer)

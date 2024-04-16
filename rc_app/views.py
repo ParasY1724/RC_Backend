@@ -5,6 +5,7 @@ from .serializers import TeamSerializer, QuestionSerializer,ProgressSerializer,C
 import jwt,datetime,random
 from rest_framework.exceptions import AuthenticationFailed
 from .permissions import JWTAuthentication
+from rest_framework.permissions import IsAdminUser
 from django.shortcuts import  redirect,render
 from django.utils import timezone
 from . import MarkingScheme,Timer,lifelines
@@ -13,6 +14,7 @@ from django.http import JsonResponse
 
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = CreateTeamSerializer
+    permission_classes = IsAdminUser
 
 class LoginView(generics.CreateAPIView):
     queryset = Team.objects.all()
@@ -93,8 +95,8 @@ class GetQuestionView(generics.ListCreateAPIView):
 
         context.update(time_data)
 
-        # return render(request, 'question.html', context)
-        return Response(context)
+        return render(request, 'question.html', context)
+        # return Response(context)
 
     
     def post(self,request):
