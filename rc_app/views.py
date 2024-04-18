@@ -14,7 +14,7 @@ from django.http import JsonResponse
 
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = CreateTeamSerializer
-    permission_classes = IsAdminUser
+    # permission_classes = [IsAdminUser]
 
 class LoginView(generics.CreateAPIView):
     queryset = Team.objects.all()
@@ -46,9 +46,6 @@ class LoginView(generics.CreateAPIView):
         token = jwt.encode(payload, 'secret', algorithm='HS256')
         return Response({'jwt': token}, status=status.HTTP_201_CREATED)
     
-    def get(self,request):
-        if(JWTAuthentication.has_permission(self,request)):
-           return redirect('get_question')
         
 
 class GetQuestionView(generics.ListCreateAPIView):
@@ -71,7 +68,7 @@ class GetQuestionView(generics.ListCreateAPIView):
             progress.end_time = timezone.now() + timezone.timedelta(hours=2)
             progress.save()
 
-        if progress.current_question == 10:
+        if progress.current_question > 10:
             return Response({"message": "Questions are over"}, status=status.HTTP_204_NO_CONTENT)
 
         questions_data = progress.question_list.split(',')
@@ -95,8 +92,9 @@ class GetQuestionView(generics.ListCreateAPIView):
 
         context.update(time_data)
 
-        return render(request, 'question.html', context)
-        # return Response(context)
+        
+        # return render(request, 'question.html', context)
+        return Response(context)
 
     
     def post(self,request):
@@ -125,12 +123,18 @@ class GetQuestionView(generics.ListCreateAPIView):
 class LeaderboardView(generics.ListAPIView):
     queryset = Progress.objects.all().order_by('-score')
     serializer_class = ProgressSerializer
-    permission_classes = [JWTAuthentication]
 
     def get(self,request):
-        team_set = self.queryset.filter(team__category=request.team.category)
+        if(JWTAuthentication.has_permission(self,request)):
+            team_set = self.queryset.filter(team__category=request.team.category)
+        else:
+            category = request.query_params.get('category',default = "NONE")
+            if category :
+                team_set = self.queryset.filter(team__category=category)
+            else :
+                return Response({"message": "Invalid URL"}, status=status.HTTP_400_BAD_REQUEST)
+            
         serialized_data = self.serializer_class(team_set, many=True).data
-
         return Response(serialized_data)
 
 class LogoutView(views.APIView):

@@ -32,7 +32,7 @@ def Amplifier(progress):
 
 #lifeline 2
 def Freezer(progress,issubmit = False):
-    if ( not progress.lifeline2  and progress.lifeline_flag == 1 and progress.current_question >= 5):
+    if ( not progress.lifeline2  and progress.lifeline_flag == 1 ):
         progress.lifeline2 = True
         progress.lifeline_flag = 3
         progress.start_time = timezone.now()
@@ -48,11 +48,12 @@ def Freezer(progress,issubmit = False):
             return JsonResponse({'hours': -1,'minutes': -1,'seconds': -1})
         time_remaining = progress.end_time - progress.start_time - timezone.timedelta(seconds=time_delta)
         time_data = Timer.Timer(time_remaining)
+
         return JsonResponse(time_data)
     
 
 def Poll(progress):
-    if  not progress.isAttemptedFirst and progress.lifeline_flag == 1:
+    if  (not(progress.isAttemptedFirst) and progress.lifeline_flag == 1) or progress.lifeline_flag == 4:
         progress.lifeline_flag = 4
         progress.lifeline3 = True
         questions_data = progress.question_list.split(',')
@@ -86,6 +87,7 @@ class GetLifeline1(generics.ListAPIView):
                 return Response(context)
         return JsonResponse({"error": "Lifeline is already used or can't use right now"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+        
 
 def save_response(question,answer):
     response_answer = str(answer)
@@ -101,5 +103,7 @@ def save_response(question,answer):
 def reset_lifelines(progress):
     if(progress.lifeline_flag == 3 ):
         Freezer(progress,True)
+    elif (progress.lifeline_flag == 4 and progress.isAttemptedFirst):
+        pass
     else :
         progress.lifeline_flag = 1

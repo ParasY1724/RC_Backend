@@ -7,7 +7,8 @@ class JWTAuthentication(BasePermission):
     def has_permission(self, request, *args, **kwargs):
         token = request.headers.get('Authorization')
         if not token:
-            raise AuthenticationFailed("Authentication credentials were not provided.")
+            # raise AuthenticationFailed("Authentication credentials were not provided.")
+            return False
         try:
             payload = jwt.decode(token, 'secret', algorithms=["HS256"])
             teamname = payload['teamname']
