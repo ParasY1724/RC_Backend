@@ -11,6 +11,7 @@ from django.utils import timezone
 from . import MarkingScheme,Timer,lifelines
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
+from sys import maxsize
 
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = CreateTeamSerializer
@@ -99,7 +100,9 @@ class GetQuestionView(generics.ListCreateAPIView):
     
     def post(self,request):
         answer = request.data.get("answer")
-        answer = int(answer)    
+        answer = int(answer)
+        if(answer > maxsize or answer < (-1 * maxsize)-1):
+            return Response({"error":"Integer Overflow"},status=status.HTTP_406_NOT_ACCEPTABLE)
         team  = request.team
         try:
             progress = Progress.objects.get(team=team)
