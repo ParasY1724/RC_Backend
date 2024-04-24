@@ -12,10 +12,45 @@ from . import MarkingScheme,Timer,lifelines
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
 from sys import maxsize
+from django.contrib.auth.hashers import make_password
+import requests
 
 class CreateTeamView(generics.CreateAPIView):
     serializer_class = CreateTeamSerializer
     # permission_classes = [IsAdminUser]
+
+# class LoginView(generics.CreateAPIView):
+#     queryset = Team.objects.all()
+#     serializer_class = TeamSerializer
+
+#     def post(self, request):
+#         teamname = request.data.get('teamname')
+#         password = request.data.get('password')
+#         try:
+#             team = Team.objects.get(teamname=teamname)
+#         except Team.DoesNotExist:
+#             hashed_password = make_password(password)
+#             team = Team.objects.create(teamname = teamname , password = hashed_password,user1 = request.data.get('user1'),user2 = request.data.get('user2'),category=request.data.get('category'))
+            
+        
+#         if not check_password(password, team.password) :
+#             raise AuthenticationFailed('Invalid teamname or password')
+        
+#         if team.login_status:
+#             raise AuthenticationFailed('User is already logged in')
+
+#         team.login_status = True
+#         team.save()
+
+#         payload = {
+#             'teamname': teamname,
+#             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
+#             'iat': datetime.datetime.utcnow(),
+#         }
+
+#         token = jwt.encode(payload, 'secret', algorithm='HS256')
+#         return Response({'jwt': token}, status=status.HTTP_201_CREATED)
+
 
 class LoginView(generics.CreateAPIView):
     queryset = Team.objects.all()
@@ -26,26 +61,78 @@ class LoginView(generics.CreateAPIView):
         password = request.data.get('password')
         try:
             team = Team.objects.get(teamname=teamname)
+
+
+            if not check_password(password, team.password) :
+             raise AuthenticationFailed('Invalid teamname or password')
+        
+            if team.login_status:
+                raise AuthenticationFailed('User is already logged in')
         except Team.DoesNotExist:
-            raise AuthenticationFailed('Invalid teamname or password')
-        
-        if not check_password(password, team.password) :
-            raise AuthenticationFailed('Invalid teamname or password')
-        
-        if team.login_status:
-            raise AuthenticationFailed('User is already logged in')
+            url = 'https://admin.credenz.in/api/verify/user/'
+            # url = "http://127.0.0.1:8001/api/verify/user/"
+            headers= {'Content-Type':'application/json'}
+            
+            data={
+                'username':teamname,
+                'password':password,
+                'event':"RC",
+                'is_team':'false'
+            }
+
+            if request.data.get('is_team'):
+                data['is_team'] = 'true'
+            
+            response =  requests.post(url,headers=headers,json=data)
+            print(response)
+
+            if response.status_code == 200:
+                        response = response.json()
+                        username_two = ''
+                        if not (request.data.get('is_team')):
+                            try:
+                                isSenior = response['user']['senior']
+                                if(isSenior):
+                                    isSenior = "SR"
+                                else:
+                                    isSenior = "JR"
+                                username_one = response['user']['username']
+                            except Exception as e:
+                                return Response({"message": "Bad Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            isSenior = response['users'][0]['senior']
+                            username_one = response['users'][0]['username']
+                            username_two = response['users'][1]['username']
+                        try:
+                            serializer  = serializer = CreateTeamSerializer(data={
+                                                            'teamname': teamname,
+                                                            'password': password,
+                                                            'category': isSenior,
+                                                            'user1': username_one,
+                                                            'user2': username_two
+                                                        })
+                            serializer.is_valid()
+                            serializer.save()
+                            team = serializer.instance
+                        except Exception as e:
+                            return Response({"message": "User not Found"}, status=status.HTTP_404_NOT_FOUND)
+            else:  
+                return Response({"message": "Bad Credentials"}, status=status.HTTP_404_NOT_FOUND)
+    
 
         team.login_status = True
         team.save()
 
         payload = {
             'teamname': teamname,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30),
             'iat': datetime.datetime.utcnow(),
         }
 
         token = jwt.encode(payload, 'secret', algorithm='HS256')
         return Response({'jwt': token}, status=status.HTTP_201_CREATED)
+
+
     
         
 

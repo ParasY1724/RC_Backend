@@ -2,11 +2,15 @@
 from django.contrib import admin
 from .models import Question, Team, Progress
 from import_export.admin import ImportExportModelAdmin
-from import_export import resources
+from import_export import resources,fields
 
 class QuestionResource(resources.ModelResource):
+    id = fields.Field(attribute='id', column_name='id')
+
     class Meta:
         model = Question
+        exclude = ('id',)
+        fields = ('question_id', 'question_text', 'correct_answer', 'responses')
 
 class TeamResource(resources.ModelResource):
     class Meta:

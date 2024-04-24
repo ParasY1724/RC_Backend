@@ -26,7 +26,7 @@ class CreateTeamSerializer(serializers.ModelSerializer):
     
     class Meta: 
         model = Team
-        fields = ['teamname', 'password', 'category', 'login_status']
+        fields = ['teamname', 'password', 'category','user1' ,'user2','login_status']
     def create(self, validated_data):
         password = validated_data.pop('password')
         hashed_password = make_password(password)
